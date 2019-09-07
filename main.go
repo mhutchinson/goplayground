@@ -16,4 +16,5 @@ func Fib() {
 	fmt.Println("Recursive", fib.RecursiveFib(n))
 	fmt.Println("ParallelRecursive", fib.ParallelRecursiveFib(n))
 	fmt.Println("Iterative", fib.IterativeFib(n))
+	fmt.Println("IterativeGen", fib.IterativeGenFib(n))
 }

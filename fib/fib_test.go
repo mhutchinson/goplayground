@@ -7,8 +7,9 @@ var impls = []struct {
 	fib  func(int) int
 }{
 	{"recursive", RecursiveFib},
-	{"parallelrecursive", ParallelRecursiveFib},
+	{"parallelRecursive", ParallelRecursiveFib},
 	{"iterative", IterativeFib},
+	{"iterativeGen", IterativeGenFib},
 }
 
 func TestFib(t *testing.T) {
