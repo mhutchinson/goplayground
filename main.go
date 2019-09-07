@@ -1,9 +1,18 @@
 package main
 
 import (
+	"fmt"
+
 	"github.com/mhutchinson/goplayground/fib"
 )
 
 func main() {
-	fib.RunMain()
+	Fib()
+}
+
+// Fib does fib
+func Fib() {
+	n := 30
+	fmt.Println("Recursive", fib.RecursiveFib(n))
+	fmt.Println("Iterative", fib.IterativeFib(n))
 }
