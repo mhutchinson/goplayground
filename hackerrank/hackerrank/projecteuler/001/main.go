@@ -11,22 +11,17 @@ import (
 
 // MultiplesSum sums up the multiples of 3 and 5 less than n
 func MultiplesSum(n int32) int64 {
-	// every n % 15 the pattern repeats, with 7 values:
-	vs := [7]int32{3, 5, 6, 9, 10, 12, 15}
-	var r int64
-	var c int32
-	var cycles int32
-	for {
-		c = cycles * 15
-		for _, v := range vs {
-			current := c + v
-			if current >= n {
-				return r
-			}
-			r += int64(current)
-		}
-		cycles++
-	}
+	r3 := arithmeticSum(3, (n-1)/3)
+	r5 := arithmeticSum(5, (n-1)/5)
+	r15 := arithmeticSum(15, (n-1)/15)
+
+	return r3 + r5 - r15
+}
+
+func arithmeticSum(m, i int32) int64 {
+	first := m
+	last := m * i
+	return int64(i) * int64(first+last) >> 1
 }
 
 func main() {
