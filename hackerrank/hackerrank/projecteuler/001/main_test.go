@@ -15,6 +15,7 @@ func TestMultiplesSum(t *testing.T) {
 		{6, 8},
 		{7, 14},
 		{10, 23},
+		{16, 60},
 	}
 	for _, c := range tables {
 		got := MultiplesSum(c.n)
