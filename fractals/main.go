@@ -6,12 +6,12 @@ import (
 )
 
 const (
-	width  = 640
-	height = 640
+	width  = 1024
+	height = 1024
 )
 
 func main() {
-	drawMandlebrot(-2+2i, 2-2i)
+	drawMandlebrot(-2.25+1.5i, 0.75-1.5i)
 }
 
 func drawMandlebrot(topLeft, bottomRight complex128) {
@@ -25,9 +25,6 @@ func drawMandlebrot(topLeft, bottomRight complex128) {
 		for y := 0; y < dc.Height(); y++ {
 			point := complex(realComp, imagComp)
 			score := mandlebrot.Score(point)
-			if x == y {
-				println(x, y, point, score)
-			}
 			dc.SetRGB(score, score, score)
 			dc.SetPixel(x, y)
 			imagComp += yInc
