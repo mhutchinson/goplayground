@@ -11,10 +11,11 @@ const (
 )
 
 func main() {
-	drawMandlebrot(-2.25+1.5i, 0.75-1.5i)
+	drawMandlebrot(-2.25+1.5i, 0.75-1.5i, "mandelbrot.png")
+	drawMandlebrot(-0.74540+0.11260i, -0.74535+0.11255i, "hardzoom.png")
 }
 
-func drawMandlebrot(topLeft, bottomRight complex128) {
+func drawMandlebrot(topLeft, bottomRight complex128, file string) {
 	calculator := mandelbrot.NewQuadraticCalculator(500)
 	t := mandelbrot.NewTile(topLeft, bottomRight, height, width)
 	grid := t.Calculate(calculator)
@@ -27,5 +28,5 @@ func drawMandlebrot(topLeft, bottomRight complex128) {
 			dc.SetPixel(x, y)
 		}
 	}
-	dc.SavePNG("mandelbrot.png")
+	dc.SavePNG(file)
 }
