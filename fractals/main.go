@@ -15,21 +15,17 @@ func main() {
 }
 
 func drawMandlebrot(topLeft, bottomRight complex128) {
-	mandlebrot := mandelbrot.NewQuadraticCalculator(500)
-	xInc := (real(bottomRight) - real(topLeft)) / width
-	yInc := (imag(bottomRight) - imag(topLeft)) / height
+	calculator := mandelbrot.NewQuadraticCalculator(500)
+	t := mandelbrot.NewTile(topLeft, bottomRight, height, width)
+	grid := t.Calculate(calculator)
 	dc := gg.NewContext(width, height)
-	realComp, imagComp := real(topLeft), imag(topLeft)
-	for x := 0; x < dc.Width(); x++ {
-		imagComp = imag(topLeft)
-		for y := 0; y < dc.Height(); y++ {
-			point := complex(realComp, imagComp)
-			score := mandlebrot.Score(point)
+	for x := 0; x < len(grid); x++ {
+		col := grid[x]
+		for y := 0; y < len(col); y++ {
+			score := grid[x][y]
 			dc.SetRGB(score, score, score)
 			dc.SetPixel(x, y)
-			imagComp += yInc
 		}
-		realComp += xInc
 	}
 	dc.SavePNG("mandelbrot.png")
 }
