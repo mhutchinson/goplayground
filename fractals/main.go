@@ -1,19 +1,72 @@
 package main
 
 import (
+	"image"
+	"image/color"
+
+	"github.com/faiface/pixel"
+	"github.com/faiface/pixel/pixelgl"
 	"github.com/fogleman/gg"
 	"github.com/mhutchinson/goplayground/fractals/mandelbrot"
 )
 
 const (
+	w, h   = 512, 512
+	fw, fh = float64(w), float64(h)
 	width  = 1024
 	height = 1024
 )
 
 func main() {
-	treeFun()
-	drawMandlebrot(-2.25+1.5i, 0.75-1.5i, "mandelbrot.png")
-	drawMandlebrot(-0.74540+0.11260i, -0.74535+0.11255i, "hardzoom.png")
+	pixelgl.Run(run)
+	// treeFun()
+	// drawMandlebrot(-2.25+1.5i, 0.75-1.5i, "mandelbrot.png")
+	// drawMandlebrot(-0.74540+0.11260i, -0.74535+0.11255i, "hardzoom.png")
+}
+
+func run() {
+	cfg := pixelgl.WindowConfig{
+		Title:  "Pixel Rocks!",
+		Bounds: pixel.R(0, 0, w, h),
+		VSync:  true,
+	}
+	win, err := pixelgl.NewWindow(cfg)
+	if err != nil {
+		panic(err)
+	}
+
+	calculator := mandelbrot.NewQuadraticCalculator(500)
+	canvas := pixelgl.NewCanvas(win.Bounds())
+
+	const quotient = 50
+	destTL, destBR := -0.74540+0.11260i, -0.74535+0.11255i
+
+	topLeft, bottomRight := -2.25+1.5i, 0.75-1.5i
+	for !win.Closed() {
+		buffer := image.NewRGBA(image.Rect(0, 0, w, h))
+
+		win.SetClosed(win.JustPressed(pixelgl.KeyEscape) || win.JustPressed(pixelgl.KeyQ))
+
+		t := mandelbrot.NewTile(topLeft, bottomRight, h, w)
+		grid := t.Calculate(calculator)
+
+		for x := 0; x < len(grid); x++ {
+			col := grid[x]
+			for y := 0; y < len(col); y++ {
+				score := grid[x][y]
+				colorInt := uint8(255 * score)
+				buffer.Set(x, y, color.RGBA{colorInt, colorInt, colorInt, 1.0})
+			}
+		}
+
+		win.Clear(color.RGBA{0, 0, 0, 255})
+		canvas.SetPixels(buffer.Pix)
+		canvas.Draw(win, pixel.IM.Moved(win.Bounds().Center()))
+		win.Update()
+
+		topLeft = topLeft - (topLeft-destTL)/quotient
+		bottomRight = bottomRight - (bottomRight-destBR)/quotient
+	}
 }
 
 func drawMandlebrot(topLeft, bottomRight complex128, file string) {
