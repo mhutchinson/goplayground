@@ -16,7 +16,7 @@ type Calculator struct {
 // Score returns a value between 0 and 1 for the probability that p is
 // in the Mandelbrot set.
 func (c *Calculator) Score(p complex128) float64 {
-	var z complex128
+	z := p
 	var i int
 	for ; i < c.maxIterations; i++ {
 		// TODO(mhutchinson): potentially look for cycles and break earlier.

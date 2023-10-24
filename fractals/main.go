@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"image"
 	"image/color"
 
@@ -8,6 +9,10 @@ import (
 	"github.com/faiface/pixel/pixelgl"
 	"github.com/fogleman/gg"
 	"github.com/mhutchinson/goplayground/fractals/mandelbrot"
+)
+
+var (
+	iters = flag.Int("i", 200, "Number of iterations per point to determine set membership. Higher values are more accurate but slower.")
 )
 
 const (
@@ -18,6 +23,7 @@ const (
 )
 
 func main() {
+	flag.Parse()
 	pixelgl.Run(run)
 	// treeFun()
 	// drawMandlebrot(-2.25+1.5i, 0.75-1.5i, "mandelbrot.png")
@@ -26,7 +32,7 @@ func main() {
 
 func run() {
 	cfg := pixelgl.WindowConfig{
-		Title:  "Pixel Rocks!",
+		Title:  "Mandelbrot Zoom",
 		Bounds: pixel.R(0, 0, w, h),
 		VSync:  true,
 	}
@@ -35,7 +41,7 @@ func run() {
 		panic(err)
 	}
 
-	calculator := mandelbrot.NewQuadraticCalculator(500)
+	calculator := mandelbrot.NewQuadraticCalculator(*iters)
 	canvas := pixelgl.NewCanvas(win.Bounds())
 
 	const quotient = 50
