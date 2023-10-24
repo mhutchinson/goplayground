@@ -16,7 +16,7 @@ var (
 )
 
 const (
-	w, h   = 512, 512
+	w, h   = 800, 800
 	fw, fh = float64(w), float64(h)
 	width  = 1024
 	height = 1024
@@ -53,7 +53,7 @@ func run() {
 
 		win.SetClosed(win.JustPressed(pixelgl.KeyEscape) || win.JustPressed(pixelgl.KeyQ))
 
-		t := mandelbrot.NewTile(topLeft, bottomRight, h, w)
+		t := mandelbrot.NewTile(topLeft, bottomRight, h/2, w/2)
 		grid := t.Calculate(calculator)
 
 		for x := 0; x < len(grid); x++ {
@@ -61,7 +61,10 @@ func run() {
 			for y := 0; y < len(col); y++ {
 				score := grid[x][y]
 				colorInt := uint8(255 * score)
-				buffer.Set(x, y, color.RGBA{colorInt, colorInt, colorInt, 1.0})
+				buffer.Set(2*x, 2*y, color.RGBA{colorInt, colorInt, colorInt, 1.0})
+				buffer.Set(2*x, 2*y+1, color.RGBA{colorInt, colorInt, colorInt, 1.0})
+				buffer.Set(2*x+1, 2*y, color.RGBA{colorInt, colorInt, colorInt, 1.0})
+				buffer.Set(2*x+1, 2*y+1, color.RGBA{colorInt, colorInt, colorInt, 1.0})
 			}
 		}
 
