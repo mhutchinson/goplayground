@@ -17,8 +17,8 @@ import (
 )
 
 var (
-	tlogURL = flag.String("url", "https://api.transparency.dev/armored-witness-firmware/ci/log/0/", "Base URL of a serverless log")
-	origin  = flag.String("origin", "transparency.dev/armored-witness/firmware_transparency/ci/0", "Origin string in checkpoint")
+	tlogURL = flag.String("url", "https://api.transparency.dev/armored-witness-firmware/ci/log/1/", "Base URL of a serverless log")
+	origin  = flag.String("origin", "transparency.dev/armored-witness/firmware_transparency/ci/1", "Origin string in checkpoint")
 	vkey    = flag.String("vkey", "transparency.dev-aw-ftlog-ci+f5479c1e+AR6gW0mycDtL17iM2uvQUThJsoiuSRirstEj9a5AdCCu", "Public key for log")
 )
 
