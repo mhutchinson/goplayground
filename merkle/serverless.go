@@ -20,6 +20,7 @@ var (
 	tlogURL = flag.String("url", "https://api.transparency.dev/armored-witness-firmware/ci/log/1/", "Base URL of a serverless log")
 	origin  = flag.String("origin", "transparency.dev/armored-witness/firmware_transparency/ci/1", "Origin string in checkpoint")
 	vkey    = flag.String("vkey", "transparency.dev-aw-ftlog-ci+f5479c1e+AR6gW0mycDtL17iM2uvQUThJsoiuSRirstEj9a5AdCCu", "Public key for log")
+	start   = flag.Uint64("start", 0, "First index to start outputting details")
 )
 
 func main() {
@@ -65,7 +66,7 @@ func main() {
 	}
 	klog.Infof("Got checkpoint for log of size %d", cp.Size)
 
-	for i := uint64(0); i < cp.Size; i++ {
+	for i := *start; i < cp.Size; i++ {
 		leaf, err := client.GetLeaf(ctx, f, i)
 		if err != nil {
 			klog.Errorf("Failed to get leaf %d: %v", i, err)
