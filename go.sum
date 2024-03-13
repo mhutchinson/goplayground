@@ -31,6 +31,8 @@ github.com/stretchr/testify v1.3.0/go.mod h1:M5WIy9Dh21IEIfnGCwXGc5bZfKNJtfHm1UV
 github.com/transparency-dev/armored-witness-applet v0.0.0-20230918140527-29dcafed830b h1:d8bLTgqLrvH1VJyNUTAzLyY/Ux13s7QHb19vEcTum7E=
 github.com/transparency-dev/armored-witness-common v0.0.0-20240111095920-905961d759e3 h1:CmCPNNIanIEl2G6u/B6CF1v25X55xuPFJ7kLutmsQh0=
 github.com/transparency-dev/armored-witness-common v0.0.0-20240111095920-905961d759e3/go.mod h1:caCvkN/VNIqoVkHq278AsVBAsJheeettIxuFVBJArFM=
+github.com/transparency-dev/armored-witness-common v0.0.0-20240311170609-95b64a02cab5 h1:ImFr86X4Z+DzY/L8tkahshg+zwQ1I6zbNOpWehFZomk=
+github.com/transparency-dev/armored-witness-common v0.0.0-20240311170609-95b64a02cab5/go.mod h1:cb6aKsLVU2OUk8+UjD8xvzxU84miHXLMHJaxO2gHDus=
 github.com/transparency-dev/formats v0.0.0-20230920083814-0f75b1d4e813 h1:PHklaeYyhPsbhWt+MnKpBvJrsJGkPEaU1JutMj4wNqM=
 github.com/transparency-dev/formats v0.0.0-20230920083814-0f75b1d4e813/go.mod h1:J2NdDb6IhKIvF6MwCvKikz9/QStRylEtS2mv+En+jBg=
 github.com/transparency-dev/merkle v0.0.2 h1:Q9nBoQcZcgPamMkGn7ghV8XiTZ/kRxn1yCG81+twTK4=
@@ -42,9 +44,13 @@ golang.org/x/image v0.0.0-20190523035834-f03afa92d3ff h1:+2zgJKVDVAz/BWSsuniCmU1
 golang.org/x/image v0.0.0-20190523035834-f03afa92d3ff/go.mod h1:kZ7UVZpmo3dzQBMxlp+ypCbDeSB+sBbTgSJuh5dn5js=
 golang.org/x/mod v0.14.0 h1:dGoOF9QVLYng8IHTm7BAyWqCqSheQ5pYWGhzW00YJr0=
 golang.org/x/mod v0.14.0/go.mod h1:hTbmBsO62+eylJbnUtE2MGJUyE7QWk4xUqPFrRgJ+7c=
+golang.org/x/mod v0.16.0 h1:QX4fJ0Rr5cPQCF7O9lh9Se4pmwfwskqZfq5moyldzic=
+golang.org/x/mod v0.16.0/go.mod h1:hTbmBsO62+eylJbnUtE2MGJUyE7QWk4xUqPFrRgJ+7c=
 golang.org/x/text v0.3.0/go.mod h1:NqM8EUOU14njkJ3fqMW+pc6Ldnwhi/IjpwHt7yyuwOQ=
 gopkg.in/check.v1 v0.0.0-20161208181325-20d25e280405/go.mod h1:Co6ibVJAznAaIkqp8huTwlJQCZ016jof/cbN4VW5Yz0=
 gopkg.in/yaml.v3 v3.0.1 h1:fxVm/GzAzEWqLHuvctI91KS9hhNmmWOoWu0XTYJS7CA=
 gopkg.in/yaml.v3 v3.0.1/go.mod h1:K4uyk7z7BCEPqu6E+C64Yfv1cQ7kz7rIZviUmN+EgEM=
 k8s.io/klog/v2 v2.120.0 h1:z+q5mfovBj1fKFxiRzsa2DsJLPIVMk/KFL81LMOfK+8=
 k8s.io/klog/v2 v2.120.0/go.mod h1:3Jpz1GvMt720eyJH1ckRHK1EDfpxISzJ7I9OYgaDtPE=
+k8s.io/klog/v2 v2.120.1 h1:QXU6cPEOIslTGvZaXvFWiP9VKyeet3sawzTOvdXb4Vw=
+k8s.io/klog/v2 v2.120.1/go.mod h1:3Jpz1GvMt720eyJH1ckRHK1EDfpxISzJ7I9OYgaDtPE=

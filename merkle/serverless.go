@@ -17,9 +17,9 @@ import (
 )
 
 var (
-	tlogURL = flag.String("url", "https://api.transparency.dev/armored-witness-firmware/ci/log/1/", "Base URL of a serverless log")
-	origin  = flag.String("origin", "transparency.dev/armored-witness/firmware_transparency/ci/1", "Origin string in checkpoint")
-	vkey    = flag.String("vkey", "transparency.dev-aw-ftlog-ci+f5479c1e+AR6gW0mycDtL17iM2uvQUThJsoiuSRirstEj9a5AdCCu", "Public key for log")
+	tlogURL = flag.String("url", "https://api.transparency.dev/armored-witness-firmware/ci/log/3/", "Base URL of a serverless log")
+	origin  = flag.String("origin", "transparency.dev/armored-witness/firmware_transparency/ci/3", "Origin string in checkpoint")
+	vkey    = flag.String("vkey", "transparency.dev-aw-ftlog-ci-3+3f689522+Aa1Eifq6rRC8qiK+bya07yV1fXyP156pEMsX7CFBC6gg", "Public key for log")
 	start   = flag.Uint64("start", 0, "First index to start outputting details")
 )
 
@@ -86,6 +86,6 @@ func main() {
 		if err := json.Unmarshal([]byte(releaseNote.Text), &release); err != nil {
 			klog.Errorf("Failed to unmarshal release at index %d: %v", i, err)
 		}
-		klog.Infof("Leaf %d: %s (%s) %.6s", i, release.Component, release.GitTagName, release.GitCommitFingerprint)
+		klog.Infof("Leaf %d (%x): %s (%s) %.6s", i, i, release.Component, release.Git.TagName, release.Git.CommitFingerprint)
 	}
 }
