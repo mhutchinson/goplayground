@@ -24,5 +24,5 @@ require (
 	github.com/transparency-dev/armored-witness-common v0.0.0-20240311170609-95b64a02cab5
 	github.com/transparency-dev/formats v0.0.0-20230920083814-0f75b1d4e813 // indirect
 	github.com/transparency-dev/merkle v0.0.2 // indirect
-	golang.org/x/image v0.0.0-20190523035834-f03afa92d3ff // indirect
+	golang.org/x/image v0.15.0 // indirect
 )
