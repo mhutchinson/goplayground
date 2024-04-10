@@ -13,7 +13,7 @@ func main() {
 	ctx := context.Background()
 	c := &http.Client{}
 	fmt.Println("hello")
-	url := "https://api.transparency.dev/prod/distributor/snakesonaplane"
+	url := "https://api.transparency.dev/notathing/distributor/snakesonaplane"
 	req, _ := http.NewRequest("PUT", url, strings.NewReader("there is no spoon"))
 	resp, err := c.Do(req.WithContext(ctx))
 	if err != nil {
