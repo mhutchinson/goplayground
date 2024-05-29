@@ -23,10 +23,11 @@ func quickMaths(v option[int]) int {
 func quickMathsStatic(v option[int]) string {
 	square := func(i int) int { return i * i }
 	add1 := func(i int) int { return i + 1 }
+	toStr := func(i int) string { return fmt.Sprintf("%d", i) }
 	r1 := bind(v, square)
 	r2 := bind(r1, add1)
 	r3 := bind(r2, square)
-	return bind(r3, func(i int) string { return fmt.Sprintf("%d", i) }).get()
+	return bind(r3, toStr).get()
 }
 
 func some[T any](v T) option[T] {
