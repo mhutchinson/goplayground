@@ -1,9 +1,15 @@
 package main
 
 import (
+	"context"
 	"flag"
-	"fmt"
+	"image"
+	"image/color"
 	"strings"
+	"time"
+
+	"github.com/rivo/tview"
+	"k8s.io/klog/v2"
 )
 
 var (
@@ -13,15 +19,46 @@ var (
 
 func main() {
 	flag.Parse()
+	ctx := context.Background()
+
 	a := newArena(*dx, *dy)
-	for x := 3; x < 6; x++ {
-		a.current[2][x] = true
-	}
-	fmt.Println(a.String())
-	a.evolve()
-	fmt.Println(a.String())
-	a.evolve()
-	fmt.Println(a.String())
+
+	// A blinker
+	// for x := 3; x < 6; x++ {
+	// 	a.current[2][x] = true
+	// }
+
+	a.current[18][11] = true
+	a.current[18][13] = true
+	a.current[17][13] = true
+	a.current[14][15] = true
+	a.current[15][15] = true
+	a.current[16][15] = true
+	a.current[13][17] = true
+	a.current[14][17] = true
+	a.current[15][17] = true
+	a.current[14][18] = true
+
+	app := tview.NewApplication()
+	image := tview.NewImage()
+
+	go func() {
+		t := time.NewTicker(200 * time.Millisecond)
+		for {
+			select {
+			case <-ctx.Done():
+				klog.Info("Evolve function quitting")
+				return
+			case <-t.C:
+			}
+			a.evolve()
+			i := a.Image()
+			image.SetImage(i)
+			app.Draw()
+		}
+	}()
+
+	app.SetRoot(image, true).Run()
 }
 
 func newArena(dx, dy int) arena {
@@ -105,4 +142,20 @@ func (a *arena) String() string {
 		sb.WriteByte('\n')
 	}
 	return sb.String()
+}
+
+func (a *arena) Image() image.Image {
+	// TODO(mhutchinson): Reuse images and write to Pix directly
+	i := image.NewNRGBA(image.Rect(0, 0, a.dx, a.dy))
+	for y := 0; y < *dy; y++ {
+		for x := 0; x < *dx; x++ {
+			cell := a.current[y][x]
+			c := color.White
+			if cell {
+				c = color.Black
+			}
+			i.Set(x, y, c)
+		}
+	}
+	return i
 }
