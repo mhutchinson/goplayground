@@ -5,16 +5,19 @@ import (
 	"flag"
 	"image"
 	"image/color"
+	"os"
 	"strings"
 	"time"
 
-	"github.com/rivo/tview"
+	"github.com/gdamore/tcell/v2"
+	_ "github.com/gdamore/tcell/v2/encoding"
 	"k8s.io/klog/v2"
 )
 
 var (
-	dx = flag.Int("dx", 32, "Horizontal size of the grid")
-	dy = flag.Int("dy", 32, "Vertical size of the grid")
+	dx    = flag.Int("dx", 32, "Horizontal size of the grid")
+	dy    = flag.Int("dy", 32, "Vertical size of the grid")
+	delay = flag.Duration("delay", 125*time.Millisecond, "Time to wait between draw loops")
 )
 
 func main() {
@@ -39,26 +42,49 @@ func main() {
 	a.current[15][17] = true
 	a.current[14][18] = true
 
-	app := tview.NewApplication()
-	image := tview.NewImage()
+	s, err := tcell.NewScreen()
+	if err != nil {
+		klog.Exitf("NewScreen(): %v", err)
+	}
+	if err := s.Init(); err != nil {
+		klog.Exitf("Init(): %v", err)
+	}
 
 	go func() {
-		t := time.NewTicker(200 * time.Millisecond)
 		for {
-			select {
-			case <-ctx.Done():
-				klog.Info("Evolve function quitting")
-				return
-			case <-t.C:
+			ev := s.PollEvent()
+			// Process event
+			switch ev := ev.(type) {
+			case *tcell.EventResize:
+				s.Sync()
+			case *tcell.EventKey:
+				if ev.Key() == tcell.KeyEscape || ev.Key() == tcell.KeyCtrlC {
+					s.Fini()
+					os.Exit(0)
+				}
 			}
-			a.evolve()
-			i := a.Image()
-			image.SetImage(i)
-			app.Draw()
 		}
 	}()
-
-	app.SetRoot(image, true).Run()
+	t := time.NewTicker(*delay)
+	for {
+		select {
+		case <-ctx.Done():
+			klog.Info("Evolve function quitting")
+			return
+		case <-t.C:
+		}
+		a.evolve()
+		s.Clear()
+		a.Visit(func(x, y int, live bool) {
+			c := tcell.NewRGBColor(255, 255, 255)
+			if !live {
+				c = tcell.NewRGBColor(0, 0, 0)
+			}
+			s.SetContent(2*x, y, ' ', []rune{}, tcell.StyleDefault.Background(c))
+			s.SetContent(2*x+1, y, ' ', []rune{}, tcell.StyleDefault.Background(c))
+		})
+		s.Show()
+	}
 }
 
 func newArena(dx, dy int) arena {
@@ -158,4 +184,12 @@ func (a *arena) Image() image.Image {
 		}
 	}
 	return i
+}
+
+func (a *arena) Visit(v func(x, y int, live bool)) {
+	for y := 0; y < *dy; y++ {
+		for x := 0; x < *dx; x++ {
+			v(x, y, a.current[y][x])
+		}
+	}
 }
