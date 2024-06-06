@@ -50,6 +50,7 @@ func main() {
 		klog.Exitf("Init(): %v", err)
 	}
 
+	pause := false
 	go func() {
 		for {
 			ev := s.PollEvent()
@@ -62,6 +63,9 @@ func main() {
 					s.Fini()
 					os.Exit(0)
 				}
+				if ev.Rune() == ' ' {
+					pause = !pause
+				}
 			}
 		}
 	}()
@@ -72,6 +76,9 @@ func main() {
 			klog.Info("Evolve function quitting")
 			return
 		case <-t.C:
+		}
+		if pause {
+			continue
 		}
 		a.evolve()
 		s.Clear()
