@@ -16,49 +16,59 @@ type WebSocketServer struct {
 	broadcast  chan *Message
 
 	clientsMux sync.RWMutex
-	clients    map[*websocket.Conn]bool
+	clients    map[string]clientConn
 }
 
 func NewWebSocket() *WebSocketServer {
-	tmpl, err := template.ParseFiles("views/message.html")
+	sentTmpl, err := template.ParseFiles("views/message_sent.html")
+	if err != nil {
+		klog.Exitf("template parsing: %s", err)
+	}
+	recvTmpl, err := template.ParseFiles("views/message_recv.html")
 	if err != nil {
 		klog.Exitf("template parsing: %s", err)
 	}
 
 	return &WebSocketServer{
-		formatting: templates{message: tmpl},
-		broadcast:  make(chan *Message),
-		clients:    make(map[*websocket.Conn]bool),
+		formatting: templates{
+			recvMessage: recvTmpl,
+			sentMessage: sentTmpl,
+		},
+		broadcast: make(chan *Message),
+		clients:   make(map[string]clientConn),
 	}
 }
 
 // HandleWebSocket accepts a websocker connection and services it
 // for the lifetime of the connection. This method will not return
 // until the connection is closed.
-func (s *WebSocketServer) HandleWebSocket(ctx *websocket.Conn) {
+func (s *WebSocketServer) HandleWebSocket(conn *websocket.Conn) {
 	id := uuid.New().String()
+	c := clientConn{
+		id:   id,
+		conn: conn,
+	}
 	klog.Infof("Registering client %s", id)
 	// Register a new Client
 	s.clientsMux.Lock()
-	s.clients[ctx] = true
+	s.clients[id] = c
 	s.clientsMux.Unlock()
 	defer func() {
 		klog.Infof("Removing client %s", id)
 		s.clientsMux.Lock()
 		defer s.clientsMux.Unlock()
-		delete(s.clients, ctx)
-		ctx.Close()
+		delete(s.clients, id)
+		conn.Close()
 	}()
 
 	for {
-		_, msg, err := ctx.ReadMessage()
+		_, msg, err := conn.ReadMessage()
 		if err != nil {
 			klog.Error("Read Error:", err)
 			break
 		}
 
 		// send the message to the broadcast channel
-		klog.Info(string(msg))
 		var message Message
 		if err := json.Unmarshal(msg, &message); err != nil {
 			klog.Exit("Error Unmarshalling", err)
@@ -74,34 +84,51 @@ func (s *WebSocketServer) HandleWebSocket(ctx *websocket.Conn) {
 // messages to clients with open websocket connections.
 func (s *WebSocketServer) HandleMessages() {
 	handleMessage := func(msg *Message) {
-		rendered := s.formatting.formatMessage(msg)
 		// Send the message to all Clients
 		s.clientsMux.RLock()
 		defer s.clientsMux.RUnlock()
-		for client := range s.clients {
-			err := client.WriteMessage(websocket.TextMessage, rendered)
+		for id, client := range s.clients {
+			var rendered []byte
+			if id == msg.ClientName {
+				rendered = s.formatting.formatSentMessage(msg)
+			} else {
+				rendered = s.formatting.formatRecvMessage(msg)
+			}
+			err := client.conn.WriteMessage(websocket.TextMessage, rendered)
 			if err != nil {
 				klog.Errorf("Write  Error: %v ", err)
 			}
 		}
-
 	}
 	for {
 		handleMessage(<-s.broadcast)
 	}
 }
 
-type templates struct {
-	message *template.Template
+type clientConn struct {
+	id   string
+	conn *websocket.Conn
 }
 
-func (t templates) formatMessage(msg *Message) []byte {
-	// Render the template with the message as data.
+type templates struct {
+	sentMessage *template.Template
+	recvMessage *template.Template
+}
+
+func (t templates) formatSentMessage(msg *Message) []byte {
 	var renderedMessage bytes.Buffer
-	err := t.message.Execute(&renderedMessage, msg)
+	err := t.sentMessage.Execute(&renderedMessage, msg)
 	if err != nil {
 		klog.Exitf("template execution: %s", err)
 	}
+	return renderedMessage.Bytes()
+}
 
+func (t templates) formatRecvMessage(msg *Message) []byte {
+	var renderedMessage bytes.Buffer
+	err := t.recvMessage.Execute(&renderedMessage, msg)
+	if err != nil {
+		klog.Exitf("template execution: %s", err)
+	}
 	return renderedMessage.Bytes()
 }
