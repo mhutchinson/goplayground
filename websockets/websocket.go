@@ -32,6 +32,9 @@ func NewWebSocket() *WebSocketServer {
 	}
 }
 
+// HandleWebSocket accepts a websocker connection and services it
+// for the lifetime of the connection. This method will not return
+// until the connection is closed.
 func (s *WebSocketServer) HandleWebSocket(ctx *websocket.Conn) {
 	id := uuid.New().String()
 	klog.Infof("Registering client %s", id)
@@ -66,21 +69,25 @@ func (s *WebSocketServer) HandleWebSocket(ctx *websocket.Conn) {
 	}
 }
 
+// HandleMessages runs for the lifetime of the server and should only
+// be called once. It continually drains the broadcast queue and sends
+// messages to clients with open websocket connections.
 func (s *WebSocketServer) HandleMessages() {
-	for {
-		msg := <-s.broadcast
-
+	handleMessage := func(msg *Message) {
 		rendered := s.formatting.formatMessage(msg)
 		// Send the message to all Clients
 		s.clientsMux.RLock()
+		defer s.clientsMux.RUnlock()
 		for client := range s.clients {
 			err := client.WriteMessage(websocket.TextMessage, rendered)
 			if err != nil {
 				klog.Errorf("Write  Error: %v ", err)
 			}
-
 		}
-		s.clientsMux.RUnlock()
+
+	}
+	for {
+		handleMessage(<-s.broadcast)
 	}
 }
 
