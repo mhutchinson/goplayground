@@ -4,11 +4,10 @@ import (
 	"bytes"
 	"encoding/json"
 	"html/template"
-	"log"
 
-	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/websocket/v2"
 	"github.com/google/uuid"
+	"k8s.io/klog/v2"
 )
 
 type WebSocketServer struct {
@@ -25,13 +24,6 @@ func NewWebSocket() *WebSocketServer {
 	}
 }
 
-func (s *WebSocketServer) HandleConnections(ctx *fiber.Ctx) error {
-	if websocket.IsWebSocketUpgrade(ctx) {
-		return ctx.Next()
-	}
-	return fiber.ErrUpgradeRequired
-}
-
 func (s *WebSocketServer) HandleWebSocket(ctx *websocket.Conn) {
 	// Register a new Client
 	s.clients[ctx] = true
@@ -43,15 +35,15 @@ func (s *WebSocketServer) HandleWebSocket(ctx *websocket.Conn) {
 	for {
 		_, msg, err := ctx.ReadMessage()
 		if err != nil {
-			log.Println("Read Error:", err)
+			klog.Error("Read Error:", err)
 			break
 		}
 
 		// send the message to the broadcast channel
-		log.Println(string(msg))
+		klog.Info(string(msg))
 		var message Message
 		if err := json.Unmarshal(msg, &message); err != nil {
-			log.Fatalf("Error Unmarshalling")
+			klog.Exit("Error Unmarshalling", err)
 		}
 		message.ClientName = s.id
 
@@ -64,31 +56,29 @@ func (s *WebSocketServer) HandleMessages() {
 		msg := <-s.broadcast
 
 		// Send the message to all Clients
-
 		for client := range s.clients {
 			err := client.WriteMessage(websocket.TextMessage, getMessageTemplate(msg))
 			if err != nil {
-				log.Printf("Write  Error: %v ", err)
+				klog.Errorf("Write  Error: %v ", err)
 				client.Close()
 				delete(s.clients, client)
 			}
 
 		}
-
 	}
 }
 
 func getMessageTemplate(msg *Message) []byte {
 	tmpl, err := template.ParseFiles("views/message.html")
 	if err != nil {
-		log.Fatalf("template parsing: %s", err)
+		klog.Exitf("template parsing: %s", err)
 	}
 
 	// Render the template with the message as data.
 	var renderedMessage bytes.Buffer
 	err = tmpl.Execute(&renderedMessage, msg)
 	if err != nil {
-		log.Fatalf("template execution: %s", err)
+		klog.Exitf("template execution: %s", err)
 	}
 
 	return renderedMessage.Bytes()
