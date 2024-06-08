@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"html/template"
+	"sync"
 
 	"github.com/gofiber/websocket/v2"
 	"github.com/google/uuid"
@@ -11,23 +12,37 @@ import (
 )
 
 type WebSocketServer struct {
-	id        string
-	clients   map[*websocket.Conn]bool
-	broadcast chan *Message
+	formatting templates
+	broadcast  chan *Message
+
+	clientsMux sync.RWMutex
+	clients    map[*websocket.Conn]bool
 }
 
 func NewWebSocket() *WebSocketServer {
+	tmpl, err := template.ParseFiles("views/message.html")
+	if err != nil {
+		klog.Exitf("template parsing: %s", err)
+	}
+
 	return &WebSocketServer{
-		id:        uuid.New().String(),
-		clients:   make(map[*websocket.Conn]bool),
-		broadcast: make(chan *Message),
+		formatting: templates{message: tmpl},
+		broadcast:  make(chan *Message),
+		clients:    make(map[*websocket.Conn]bool),
 	}
 }
 
 func (s *WebSocketServer) HandleWebSocket(ctx *websocket.Conn) {
+	id := uuid.New().String()
+	klog.Infof("Registering client %s", id)
 	// Register a new Client
+	s.clientsMux.Lock()
 	s.clients[ctx] = true
+	s.clientsMux.Unlock()
 	defer func() {
+		klog.Infof("Removing client %s", id)
+		s.clientsMux.Lock()
+		defer s.clientsMux.Unlock()
 		delete(s.clients, ctx)
 		ctx.Close()
 	}()
@@ -45,7 +60,7 @@ func (s *WebSocketServer) HandleWebSocket(ctx *websocket.Conn) {
 		if err := json.Unmarshal(msg, &message); err != nil {
 			klog.Exit("Error Unmarshalling", err)
 		}
-		message.ClientName = s.id
+		message.ClientName = id
 
 		s.broadcast <- &message
 	}
@@ -55,28 +70,28 @@ func (s *WebSocketServer) HandleMessages() {
 	for {
 		msg := <-s.broadcast
 
+		rendered := s.formatting.formatMessage(msg)
 		// Send the message to all Clients
+		s.clientsMux.RLock()
 		for client := range s.clients {
-			err := client.WriteMessage(websocket.TextMessage, getMessageTemplate(msg))
+			err := client.WriteMessage(websocket.TextMessage, rendered)
 			if err != nil {
 				klog.Errorf("Write  Error: %v ", err)
-				client.Close()
-				delete(s.clients, client)
 			}
 
 		}
+		s.clientsMux.RUnlock()
 	}
 }
 
-func getMessageTemplate(msg *Message) []byte {
-	tmpl, err := template.ParseFiles("views/message.html")
-	if err != nil {
-		klog.Exitf("template parsing: %s", err)
-	}
+type templates struct {
+	message *template.Template
+}
 
+func (t templates) formatMessage(msg *Message) []byte {
 	// Render the template with the message as data.
 	var renderedMessage bytes.Buffer
-	err = tmpl.Execute(&renderedMessage, msg)
+	err := t.message.Execute(&renderedMessage, msg)
 	if err != nil {
 		klog.Exitf("template execution: %s", err)
 	}
