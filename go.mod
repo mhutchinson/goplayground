@@ -6,10 +6,10 @@ require (
 	github.com/faiface/pixel v0.10.0
 	github.com/fogleman/gg v1.3.0
 	github.com/gdamore/tcell/v2 v2.7.4
-	github.com/gofiber/fiber/v2 v2.52.4
-	github.com/gofiber/template/html/v2 v2.1.1
+	github.com/gofiber/fiber/v2 v2.52.5
+	github.com/gofiber/template/html/v2 v2.1.2
 	github.com/gofiber/websocket/v2 v2.2.1
-	github.com/google/uuid v1.5.0
+	github.com/google/uuid v1.6.0
 	github.com/transparency-dev/serverless-log v0.0.0-20240115115102-149d17dc88b2
 	golang.org/x/mod v0.19.0
 	k8s.io/klog/v2 v2.130.1
