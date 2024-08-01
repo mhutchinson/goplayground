@@ -34,7 +34,7 @@ require (
 	github.com/valyala/tcplisten v1.0.0 // indirect
 	golang.org/x/sys v0.17.0 // indirect
 	golang.org/x/term v0.17.0 // indirect
-	golang.org/x/text v0.14.0 // indirect
+	golang.org/x/text v0.16.0 // indirect
 )
 
 require (
@@ -49,5 +49,5 @@ require (
 	github.com/transparency-dev/armored-witness-common v0.0.0-20240311170609-95b64a02cab5
 	github.com/transparency-dev/formats v0.0.0-20230920083814-0f75b1d4e813 // indirect
 	github.com/transparency-dev/merkle v0.0.2 // indirect
-	golang.org/x/image v0.15.0 // indirect
+	golang.org/x/image v0.18.0 // indirect
 )
