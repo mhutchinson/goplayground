@@ -5,13 +5,13 @@ go 1.24.0
 require (
 	github.com/faiface/pixel v0.10.0
 	github.com/fogleman/gg v1.3.0
-	github.com/gdamore/tcell/v2 v2.13.4
+	github.com/gdamore/tcell/v2 v2.13.7
 	github.com/gofiber/fiber/v2 v2.52.10
 	github.com/gofiber/template/html/v2 v2.1.3
 	github.com/gofiber/websocket/v2 v2.2.1
 	github.com/google/uuid v1.6.0
 	github.com/transparency-dev/serverless-log v0.0.0-20240115115102-149d17dc88b2
-	golang.org/x/mod v0.31.0
+	golang.org/x/mod v0.32.0
 	k8s.io/klog/v2 v2.130.1
 )
 
