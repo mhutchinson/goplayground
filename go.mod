@@ -12,7 +12,7 @@ require (
 	github.com/google/uuid v1.6.0
 	github.com/transparency-dev/serverless-log v0.0.0-20240115115102-149d17dc88b2
 	golang.org/x/mod v0.33.0
-	k8s.io/klog/v2 v2.130.1
+	k8s.io/klog/v2 v2.140.0
 )
 
 require (
