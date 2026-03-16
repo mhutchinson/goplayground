@@ -1,6 +1,6 @@
 module github.com/mhutchinson/goplayground
 
-go 1.24.0
+go 1.25.0
 
 require (
 	github.com/faiface/pixel v0.10.0
@@ -11,7 +11,7 @@ require (
 	github.com/gofiber/websocket/v2 v2.2.1
 	github.com/google/uuid v1.6.0
 	github.com/transparency-dev/serverless-log v0.0.0-20240115115102-149d17dc88b2
-	golang.org/x/mod v0.33.0
+	golang.org/x/mod v0.34.0
 	k8s.io/klog/v2 v2.140.0
 )
 
