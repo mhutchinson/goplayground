@@ -5,7 +5,7 @@ go 1.25.0
 require (
 	github.com/faiface/pixel v0.10.0
 	github.com/fogleman/gg v1.3.0
-	github.com/gdamore/tcell/v2 v2.13.9
+	github.com/gdamore/tcell/v2 v2.13.10
 	github.com/gofiber/fiber/v2 v2.52.13
 	github.com/gofiber/template/html/v2 v2.1.3
 	github.com/gofiber/websocket/v2 v2.2.1
