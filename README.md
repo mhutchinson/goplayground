@@ -7,7 +7,7 @@ Fun times exploring different features, libraries, and challenges in Go. Moderni
 Below is a directory of the projects within this repository, along with brief descriptions of what they do:
 
 *   **[fib](./fib)**: Fibonacci sequence calculators. Features recursive, parallelized recursive (using goroutines), iterative, closure-based generator, and modern Go 1.23+ `iter.Seq` iterator implementations.
-*   **[fractals](./fractals)**: A Mandelbrot set visualizer using OpenGL (via the `pixel` library) and a fractal tree generator using `gg`. (Requires CGO/graphics libraries to run).
+*   **[fractals](./fractals)**: A Mandelbrot set visualizer using Ebitengine and a fractal tree generator using `gg`.
 *   **[gameoflife](./gameoflife)**: Conway's Game of Life simulated dynamically inside the terminal using the `tcell` terminal library, modernized to range over cells using a custom `iter.Seq2` iterator.
 *   **[generics](./generics)**: Exploration of Go generic type parameters. Implements an `option` type and a monadic `bind` operation.
 *   **[hackerrank](./hackerrank)**: Solutions to programming challenges from HackerRank, including Euler Project #1.
