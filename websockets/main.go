@@ -1,11 +1,13 @@
 package main
 
 import (
+	"log/slog"
+	"os"
+
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/template/html/v2"
 	"github.com/gofiber/websocket/v2"
 	"github.com/mhutchinson/goplayground/websockets/handlers"
-	"k8s.io/klog/v2"
 )
 
 func main() {
@@ -30,6 +32,7 @@ func main() {
 	go server.HandleMessages()
 
 	if err := app.Listen(":3000"); err != nil {
-		klog.Exit(err)
+		slog.Error("App listen failed", "error", err)
+		os.Exit(1)
 	}
 }

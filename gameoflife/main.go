@@ -5,13 +5,14 @@ import (
 	"flag"
 	"image"
 	"image/color"
+	"iter"
+	"log/slog"
 	"os"
 	"strings"
 	"time"
 
 	"github.com/gdamore/tcell/v2"
 	_ "github.com/gdamore/tcell/v2/encoding"
-	"k8s.io/klog/v2"
 )
 
 var (
@@ -44,10 +45,12 @@ func main() {
 
 	s, err := tcell.NewScreen()
 	if err != nil {
-		klog.Exitf("NewScreen(): %v", err)
+		slog.Error("NewScreen() failed", "error", err)
+		os.Exit(1)
 	}
 	if err := s.Init(); err != nil {
-		klog.Exitf("Init(): %v", err)
+		slog.Error("Init() failed", "error", err)
+		os.Exit(1)
 	}
 
 	pause := false
@@ -70,10 +73,11 @@ func main() {
 		}
 	}()
 	t := time.NewTicker(*delay)
+	defer t.Stop()
 	for {
 		select {
 		case <-ctx.Done():
-			klog.Info("Evolve function quitting")
+			slog.Info("Evolve function quitting")
 			return
 		case <-t.C:
 		}
@@ -82,14 +86,14 @@ func main() {
 		}
 		a.evolve()
 		s.Clear()
-		a.Visit(func(x, y int, live bool) {
+		for pt, live := range a.Cells() {
 			c := tcell.NewRGBColor(255, 255, 255)
 			if !live {
 				c = tcell.NewRGBColor(0, 0, 0)
 			}
-			s.SetContent(2*x, y, ' ', []rune{}, tcell.StyleDefault.Background(c))
-			s.SetContent(2*x+1, y, ' ', []rune{}, tcell.StyleDefault.Background(c))
-		})
+			s.SetContent(2*pt.X, pt.Y, ' ', []rune{}, tcell.StyleDefault.Background(c))
+			s.SetContent(2*pt.X+1, pt.Y, ' ', []rune{}, tcell.StyleDefault.Background(c))
+		}
 		s.Show()
 	}
 }
@@ -197,6 +201,19 @@ func (a *arena) Visit(v func(x, y int, live bool)) {
 	for y := 0; y < *dy; y++ {
 		for x := 0; x < *dx; x++ {
 			v(x, y, a.current[y][x])
+		}
+	}
+}
+
+// Cells returns an iterator that yields each coordinate and whether the cell is live.
+func (a *arena) Cells() iter.Seq2[image.Point, bool] {
+	return func(yield func(image.Point, bool) bool) {
+		for y := 0; y < *dy; y++ {
+			for x := 0; x < *dx; x++ {
+				if !yield(image.Point{X: x, Y: y}, a.current[y][x]) {
+					return
+				}
+			}
 		}
 	}
 }

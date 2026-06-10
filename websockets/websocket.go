@@ -4,11 +4,12 @@ import (
 	"bytes"
 	"encoding/json"
 	"html/template"
+	"log/slog"
+	"os"
 	"sync"
 
 	"github.com/gofiber/websocket/v2"
 	"github.com/google/uuid"
-	"k8s.io/klog/v2"
 )
 
 type WebSocketServer struct {
@@ -22,11 +23,13 @@ type WebSocketServer struct {
 func NewWebSocket() *WebSocketServer {
 	sentTmpl, err := template.ParseFiles("views/message_sent.html")
 	if err != nil {
-		klog.Exitf("template parsing: %s", err)
+		slog.Error("template parsing failed", "error", err)
+		os.Exit(1)
 	}
 	recvTmpl, err := template.ParseFiles("views/message_recv.html")
 	if err != nil {
-		klog.Exitf("template parsing: %s", err)
+		slog.Error("template parsing failed", "error", err)
+		os.Exit(1)
 	}
 
 	return &WebSocketServer{
@@ -48,13 +51,13 @@ func (s *WebSocketServer) HandleWebSocket(conn *websocket.Conn) {
 		id:   id,
 		conn: conn,
 	}
-	klog.Infof("Registering client %s", id)
+	slog.Info("Registering client", "id", id)
 	// Register a new Client
 	s.clientsMux.Lock()
 	s.clients[id] = c
 	s.clientsMux.Unlock()
 	defer func() {
-		klog.Infof("Removing client %s", id)
+		slog.Info("Removing client", "id", id)
 		s.clientsMux.Lock()
 		defer s.clientsMux.Unlock()
 		delete(s.clients, id)
@@ -64,14 +67,15 @@ func (s *WebSocketServer) HandleWebSocket(conn *websocket.Conn) {
 	for {
 		_, msg, err := conn.ReadMessage()
 		if err != nil {
-			klog.Error("Read Error:", err)
+			slog.Error("Read Error", "error", err)
 			break
 		}
 
 		// send the message to the broadcast channel
 		var message Message
 		if err := json.Unmarshal(msg, &message); err != nil {
-			klog.Exit("Error Unmarshalling", err)
+			slog.Error("Error Unmarshalling", "error", err)
+			break
 		}
 		message.ClientName = id
 
@@ -89,14 +93,19 @@ func (s *WebSocketServer) HandleMessages() {
 		defer s.clientsMux.RUnlock()
 		for id, client := range s.clients {
 			var rendered []byte
+			var err error
 			if id == msg.ClientName {
-				rendered = s.formatting.formatSentMessage(msg)
+				rendered, err = s.formatting.formatSentMessage(msg)
 			} else {
-				rendered = s.formatting.formatRecvMessage(msg)
+				rendered, err = s.formatting.formatRecvMessage(msg)
 			}
-			err := client.conn.WriteMessage(websocket.TextMessage, rendered)
 			if err != nil {
-				klog.Errorf("Write  Error: %v ", err)
+				slog.Error("Template execution failed", "error", err)
+				continue
+			}
+			err = client.conn.WriteMessage(websocket.TextMessage, rendered)
+			if err != nil {
+				slog.Error("Write Error", "error", err)
 			}
 		}
 	}
@@ -115,20 +124,20 @@ type templates struct {
 	recvMessage *template.Template
 }
 
-func (t templates) formatSentMessage(msg *Message) []byte {
+func (t templates) formatSentMessage(msg *Message) ([]byte, error) {
 	var renderedMessage bytes.Buffer
 	err := t.sentMessage.Execute(&renderedMessage, msg)
 	if err != nil {
-		klog.Exitf("template execution: %s", err)
+		return nil, err
 	}
-	return renderedMessage.Bytes()
+	return renderedMessage.Bytes(), nil
 }
 
-func (t templates) formatRecvMessage(msg *Message) []byte {
+func (t templates) formatRecvMessage(msg *Message) ([]byte, error) {
 	var renderedMessage bytes.Buffer
 	err := t.recvMessage.Execute(&renderedMessage, msg)
 	if err != nil {
-		klog.Exitf("template execution: %s", err)
+		return nil, err
 	}
-	return renderedMessage.Bytes()
+	return renderedMessage.Bytes(), nil
 }

@@ -3,10 +3,10 @@ package main
 import (
 	"context"
 	"fmt"
+	"log/slog"
 	"net/http"
+	"os"
 	"strings"
-
-	"k8s.io/klog/v2"
 )
 
 func main() {
@@ -14,16 +14,25 @@ func main() {
 	c := &http.Client{}
 	fmt.Println("hello")
 	url := "https://api.transparency.dev/notathing/distributor/snakesonaplane"
-	req, _ := http.NewRequest("PUT", url, strings.NewReader("there is no spoon"))
-	resp, err := c.Do(req.WithContext(ctx))
+	req, err := http.NewRequestWithContext(ctx, "PUT", url, strings.NewReader("there is no spoon"))
 	if err != nil {
-		klog.Exit(err)
+		slog.Error("Failed to create HTTP request", "error", err)
+		os.Exit(1)
 	}
-	if resp.StatusCode != 200 {
-		klog.Exitf("Bad status response: %d", resp.StatusCode)
+	resp, err := c.Do(req)
+	if err != nil {
+		slog.Error("HTTP request failed", "error", err)
+		os.Exit(1)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		slog.Error("Bad status response", "status", resp.StatusCode)
+		os.Exit(1)
 	}
 	if resp.Request.Method != "PUT" {
-		klog.Exitf("PUT request to %q was converted to %s request to %q", url, resp.Request.Method, resp.Request.URL)
+		slog.Error("Request redirect/method conversion", "expected", "PUT", "got", resp.Request.Method, "url", url, "targetURL", resp.Request.URL.String())
+		os.Exit(1)
 	}
-	klog.Info(resp.Request.Method)
+	slog.Info("Request completed successfully", "method", resp.Request.Method)
 }

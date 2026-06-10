@@ -1,6 +1,6 @@
 module github.com/mhutchinson/goplayground
 
-go 1.25.0
+go 1.26.0
 
 require (
 	github.com/faiface/pixel v0.10.0
@@ -12,7 +12,6 @@ require (
 	github.com/google/uuid v1.6.0
 	github.com/transparency-dev/serverless-log v0.0.0-20240115115102-149d17dc88b2
 	golang.org/x/mod v0.36.0
-	k8s.io/klog/v2 v2.140.0
 )
 
 require (
@@ -43,7 +42,6 @@ require (
 	github.com/go-gl/gl v0.0.0-20190320180904-bf2b1f2f34d7 // indirect
 	github.com/go-gl/glfw/v3.3/glfw v0.0.0-20191125211704-12ad95a8df72 // indirect
 	github.com/go-gl/mathgl v0.0.0-20190416160123-c4601bc793c7 // indirect
-	github.com/go-logr/logr v1.4.1 // indirect
 	github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0 // indirect
 	github.com/pkg/errors v0.8.1 // indirect
 	github.com/transparency-dev/armored-witness-common v0.0.0-20240311170609-95b64a02cab5

@@ -1,5 +1,7 @@
 package fib
 
+import "iter"
+
 // IterativeFib returns the nth value from the fibonnaci sequence
 func IterativeFib(n int) int {
 	if n < 0 {
@@ -34,3 +36,32 @@ func GeneratorFib() func() int {
 		return r
 	}
 }
+
+// InfiniteFibSeq returns an iterator that yields Fibonacci numbers indefinitely.
+func InfiniteFibSeq() iter.Seq[int] {
+	return func(yield func(int) bool) {
+		a, b := 0, 1
+		for {
+			if !yield(b) {
+				return
+			}
+			a, b = b, a+b
+		}
+	}
+}
+
+// IterativeSeqFib returns the nth value using InfiniteFibSeq
+func IterativeSeqFib(n int) int {
+	if n < 0 {
+		return 0
+	}
+	i := 0
+	for val := range InfiniteFibSeq() {
+		if i == n {
+			return val
+		}
+		i++
+	}
+	return 0
+}
+

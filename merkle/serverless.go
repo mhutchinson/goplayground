@@ -6,6 +6,7 @@ import (
 	"flag"
 	"fmt"
 	"io"
+	"log/slog"
 	"net/http"
 	"net/url"
 	"os"
@@ -13,7 +14,6 @@ import (
 	"github.com/transparency-dev/armored-witness-common/release/firmware/ftlog"
 	"github.com/transparency-dev/serverless-log/client"
 	"golang.org/x/mod/sumdb/note"
-	"k8s.io/klog/v2"
 )
 
 var (
@@ -30,19 +30,20 @@ func main() {
 	f := func(ctx context.Context, path string) ([]byte, error) {
 		u, err := url.Parse(*tlogURL + path)
 		if err != nil {
-			klog.Exitf("Failed to parse URL: %v", err)
+			slog.Error("Failed to parse URL", "error", err)
+			os.Exit(1)
 		}
-		req, err := http.NewRequest("GET", u.String(), nil)
+		req, err := http.NewRequestWithContext(ctx, "GET", u.String(), nil)
 		if err != nil {
 			return nil, err
 		}
-		resp, err := http.DefaultClient.Do(req.WithContext(ctx))
+		resp, err := http.DefaultClient.Do(req)
 		if err != nil {
 			return nil, err
 		}
 		switch resp.StatusCode {
 		case 404:
-			klog.Infof("Not found: %q", u.String())
+			slog.Info("Not found", "url", u.String())
 			return nil, os.ErrNotExist
 		case 200:
 			break
@@ -51,41 +52,49 @@ func main() {
 		}
 		defer func() {
 			if err := resp.Body.Close(); err != nil {
-				klog.Errorf("resp.Body.Close(): %v", err)
+				slog.Error("resp.Body.Close() failed", "error", err)
 			}
 		}()
 		return io.ReadAll(resp.Body)
 	}
 	v, err := note.NewVerifier(*vkey)
 	if err != nil {
-		klog.Exitf("Failed to create verifier: %v", err)
+		slog.Error("Failed to create verifier", "error", err)
+		os.Exit(1)
 	}
 	cp, _, _, err := client.FetchCheckpoint(ctx, f, v, *origin)
 	if err != nil {
-		klog.Exitf("Failed to fetch checkpoint: %v", err)
+		slog.Error("Failed to fetch checkpoint", "error", err)
+		os.Exit(1)
 	}
-	klog.Infof("Got checkpoint for log of size %d", cp.Size)
+	slog.Info("Got checkpoint", "size", cp.Size)
 
 	for i := *start; i < cp.Size; i++ {
 		leaf, err := client.GetLeaf(ctx, f, i)
 		if err != nil {
-			klog.Errorf("Failed to get leaf %d: %v", i, err)
+			slog.Error("Failed to get leaf", "index", i, "error", err)
 			continue
 		}
 		releaseNote, err := note.Open([]byte(leaf), note.VerifierList())
 		if err != nil {
 			if e, ok := err.(*note.UnverifiedNoteError); ok {
 				releaseNote = e.Note
-				klog.V(2).Infof("Note at leaf %d was not verified: %v", i, err)
+				slog.Debug("Note was not verified", "index", i, "error", err)
 			} else {
-				klog.Errorf("Failed to open note at leaf %d: %v", i, err)
+				slog.Error("Failed to open note", "index", i, "error", err)
 				continue
 			}
 		}
 		var release ftlog.FirmwareRelease
 		if err := json.Unmarshal([]byte(releaseNote.Text), &release); err != nil {
-			klog.Errorf("Failed to unmarshal release at index %d: %v", i, err)
+			slog.Error("Failed to unmarshal release", "index", i, "error", err)
 		}
-		klog.Infof("Leaf %d (%x): %s (%s) %.6s", i, i, release.Component, release.Git.TagName, release.Git.CommitFingerprint)
+		slog.Info("Leaf info",
+			"index", i,
+			"hex", fmt.Sprintf("%x", i),
+			"component", release.Component,
+			"tag", release.Git.TagName,
+			"commit", fmt.Sprintf("%.6s", release.Git.CommitFingerprint),
+		)
 	}
 }
