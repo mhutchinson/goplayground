@@ -35,10 +35,10 @@ require (
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasthttp v1.51.0 // indirect
 	github.com/valyala/tcplisten v1.0.0 // indirect
-	golang.org/x/sync v0.18.0 // indirect
+	golang.org/x/sync v0.21.0 // indirect
 	golang.org/x/sys v0.38.0 // indirect
 	golang.org/x/term v0.37.0 // indirect
-	golang.org/x/text v0.31.0 // indirect
+	golang.org/x/text v0.38.0 // indirect
 )
 
 require (
@@ -46,5 +46,5 @@ require (
 	github.com/transparency-dev/armored-witness-common v0.0.0-20240311170609-95b64a02cab5
 	github.com/transparency-dev/formats v0.0.0-20230920083814-0f75b1d4e813 // indirect
 	github.com/transparency-dev/merkle v0.0.2 // indirect
-	golang.org/x/image v0.31.0 // indirect
+	golang.org/x/image v0.42.0 // indirect
 )
